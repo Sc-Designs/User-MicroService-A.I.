@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import { BadRequestError } from "../utils/errors.js";
 
-const RegisterUserService = async ({ name, email, password }) => {
+const RegisterUserService = async ({ name, email, password,otp }) => {
   if (
     (!name || name == null || name == undefined) &&
     (!email || email == null || email == undefined) &&
@@ -14,6 +14,8 @@ const RegisterUserService = async ({ name, email, password }) => {
     name,
     email,
     password: hashedPassword,
+    otp,
+    otpExpiry: Date.now() + Number(process.env.OTP_EXPIRY_MS),
   });
   return user;
 };

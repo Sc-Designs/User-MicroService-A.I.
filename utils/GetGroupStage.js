@@ -1,11 +1,19 @@
-function getGroupStage(filter) {
+const getGroupStage = (filter) => {
   if (filter === "weekly") {
-    return { year: { $year: "$createdAt" }, week: { $isoWeek: "$createdAt" } };
+    return {
+      week: { $isoWeek: "$createdAt" },
+      year: { $year: "$createdAt" },
+    };
   } else if (filter === "monthly") {
-    return { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } };
+    return {
+      month: { $month: "$createdAt" },
+      year: { $year: "$createdAt" },
+    };
   } else {
-    return { year: { $year: "$createdAt" } };
-  }
-}
 
+    return {
+      year: { $year: "$createdAt" },
+    };
+  }
+};
 export default getGroupStage;

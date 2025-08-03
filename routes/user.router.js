@@ -64,12 +64,12 @@ router.post(
   tryCatch(profileEdit)
 );
 
-router.get("/analytics", logerAuthenticate, tryCatch(analytics));
 
 router.get("/profile",
   logerAuthenticate, tryCatch(GetProfile)
-  );
+);
 
+router.get("/analytics", isAdminLoggedIn, tryCatch(analytics));
 router.get("/search", isAdminLoggedIn, tryCatch(SearchPeople));
 
 router.get("/log-out", tryCatch(logOut));
