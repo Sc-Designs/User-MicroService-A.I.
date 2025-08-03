@@ -9,10 +9,12 @@ import {
   resendOtp,
   profileEdit,
   analytics,
+  SearchPeople,
   logOut,
 } from "../controllers/user.controller.js";
 import { body } from "express-validator";
 import logerAuthenticate from "../middleware/isLoggedInUser.js";
+import isAdminLoggedIn from "../middleware/isAdminLoggedIn.js";
 
 const router = express.Router();
 const upload = multer();
@@ -67,6 +69,8 @@ router.get("/analytics", logerAuthenticate, tryCatch(analytics));
 router.get("/profile",
   logerAuthenticate, tryCatch(GetProfile)
   );
+
+router.get("/search", isAdminLoggedIn, tryCatch(SearchPeople));
 
 router.get("/log-out", tryCatch(logOut));
 export default router;

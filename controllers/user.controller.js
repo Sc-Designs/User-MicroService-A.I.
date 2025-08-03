@@ -131,13 +131,16 @@ const GetProfile = async (req, res) => {
     query: req.user._id,
     lean: true,
   });
-  const start = Date.now();
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (user.block) {
+    return res.status(403).json({ message: "User is blocked" });
+  }
   const resultArr = await rpcPublish(publishToQueue, "get-result", {
     id: user._id,
   });
-  console.log("RPC roundtrip:", Date.now() - start);
   const userCleaned = cleanUpUser(user, true);
-
   return res.status(200).json({
     user: userCleaned,
     results: resultArr,
@@ -196,6 +199,7 @@ const logOut = async (req,res)=>{
   redisClient.set(token, "logout","EX", 60*60*24)
   res.status(200).json("LogOut successfully.")
 }
+
 const analytics = async (req,res)=>{
   const filter = req.query.filter || 'monthly';
   const groupBy = getGroupStage(filter);
@@ -214,6 +218,41 @@ const analytics = async (req,res)=>{
   }
 }
 
+const SearchPeople = async (req, res) => {
+  const { query, page = 1 } = req.query;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  if (!query) return res.status(400).json({ message: "No search query" });
+
+  try {
+    const users = await User.find({
+      $or: [
+        { name: { $regex: `^${query}`, $options: "i" } },
+        { email: { $regex: `^${query}`, $options: "i" } },
+      ],
+    })
+      .select("name email number block")
+      .lean()
+      .skip(skip)
+      .limit(limit);
+
+    const total = await User.countDocuments({
+      $or: [
+        { name: { $regex: `^${query}`, $options: "i" } },
+        { email: { $regex: `^${query}`, $options: "i" } },
+      ],
+    });
+
+    const hasMore = skip + users.length < total;
+
+    res.json({ users, hasMore });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
 export {
   Register,
   Login,
@@ -223,4 +262,5 @@ export {
   profileEdit,
   logOut,
   analytics,
+  SearchPeople,
 };
