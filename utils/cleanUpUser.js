@@ -5,14 +5,11 @@ const cleanUpUser = (user, lean = false) => {
     isVerified,
     updatedAt,
     __v,
-    _id,
     otp,
     otpExpiry,
-    result,
+    profileImagePublicId,
     ...safeuser
   } = source;
-
-
 
   return {...safeuser};
 };

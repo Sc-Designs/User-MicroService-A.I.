@@ -9,8 +9,6 @@ import { uploadImage } from "../db/cloudinary-connection.js";
 import { v2 as cloudinary } from "cloudinary";
 import User from "../models/user.model.js";
 import redisClient from '../services/redis.service.js';
-import { publishToQueue } from "../services/rabbit.service.js";
-import { rpcPublish } from "../utils/rpcClient.js";
 import getGroupStage from "../utils/GetGroupStage.js";
 
 
@@ -47,6 +45,7 @@ const Register = async (req, res) => {
     mess: `Your OTP is ${otp}`,
   });
 };
+
 const Login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -136,13 +135,9 @@ const GetProfile = async (req, res) => {
   if (user.block) {
     return res.status(403).json({ message: "User is blocked" });
   }
-  const resultArr = await rpcPublish(publishToQueue, "get-result", {
-    id: user._id,
-  });
   const userCleaned = cleanUpUser(user, true);
   return res.status(200).json({
     user: userCleaned,
-    results: resultArr,
   });
 };
 
@@ -188,6 +183,9 @@ const profileEdit = async (req, res) => {
   }
 
   await user.save();
+  res.status(200).json({
+    user: cleanUpUser(user),
+  });
   return res
     .status(200)
     .json({ message: "Profile updated successfully", user: cleanUpUser(user) });
