@@ -98,7 +98,7 @@ const verifyOtp = async (req, res) => {
   res.json({
     message: "OTP verified successfully",
     token,
-    user: cleanUpUser(user),
+    userData: {user: cleanUpUser(user)},
   });
 };
 
@@ -135,9 +135,8 @@ const GetProfile = async (req, res) => {
   if (user.block) {
     return res.status(403).json({ message: "User is blocked" });
   }
-  const userCleaned = cleanUpUser(user, true);
   return res.status(200).json({
-    user: userCleaned,
+    user: cleanUpUser(user, true),
   });
 };
 
