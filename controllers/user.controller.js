@@ -12,7 +12,6 @@ import redisClient from '../services/redis.service.js';
 import getGroupStage from "../utils/GetGroupStage.js";
 
 
-
 const Register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -245,7 +244,30 @@ const SearchPeople = async (req, res) => {
   }
 };
 
+const addResult = async (req, res) => {
+  const {resultId} = req.body;
+  const user = await userFinder({
+    key: "_id",
+    query: req.user._id,
+  });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  user.result.push(resultId);
+  await user.save();
+  res.status(200).json({ message: "Result is Published Now"});
+}
 
+const blockUser = async (req, res)=>{
+  const {to} = req.body;
+  const user = await userFinder({
+    key: "_id",
+    query: to,
+  });
+  user.block = !user.block;
+  await user.save();
+  res.status(200).json({blockStatus: user.block, message: "user block status changed successfully"});
+}
 
 export {
   Register,
@@ -257,4 +279,6 @@ export {
   logOut,
   analytics,
   SearchPeople,
+  addResult,
+  blockUser,
 };

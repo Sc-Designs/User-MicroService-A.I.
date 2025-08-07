@@ -11,10 +11,13 @@ import {
   analytics,
   SearchPeople,
   logOut,
+  addResult,
+  blockUser,
 } from "../controllers/user.controller.js";
 import { body } from "express-validator";
 import logerAuthenticate from "../middleware/isLoggedInUser.js";
 import isAdminLoggedIn from "../middleware/isAdminLoggedIn.js";
+
 
 const router = express.Router();
 const upload = multer();
@@ -71,6 +74,7 @@ router.get("/profile",
 
 router.get("/analytics", isAdminLoggedIn, tryCatch(analytics));
 router.get("/search", isAdminLoggedIn, tryCatch(SearchPeople));
-
+router.post("/result-add", logerAuthenticate, tryCatch(addResult));
+router.post("/block-user", isAdminLoggedIn, tryCatch(blockUser));
 router.get("/log-out", tryCatch(logOut));
 export default router;
