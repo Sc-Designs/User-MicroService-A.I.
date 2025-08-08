@@ -13,6 +13,9 @@ import {
   logOut,
   addResult,
   blockUser,
+  forgetPassword,
+  otpValidation,
+  updatePassword,
 } from "../controllers/user.controller.js";
 import { body } from "express-validator";
 import logerAuthenticate from "../middleware/isLoggedInUser.js";
@@ -73,8 +76,11 @@ router.get("/profile",
 );
 
 router.get("/analytics", isAdminLoggedIn, tryCatch(analytics));
+router.post("/forgetPass",[body("email").isEmail().withMessage("This email is not valid."), body("otp").isLength({min: 6, max: 6})], tryCatch(forgetPassword));
+router.post("/forget-pass-otp", tryCatch(otpValidation));
+router.post("/updatePassword", tryCatch(updatePassword));
 router.get("/search", isAdminLoggedIn, tryCatch(SearchPeople));
 router.post("/result-add", logerAuthenticate, tryCatch(addResult));
 router.post("/block-user", isAdminLoggedIn, tryCatch(blockUser));
-router.get("/log-out", tryCatch(logOut));
+router.get("/log-out",logerAuthenticate, tryCatch(logOut));
 export default router;

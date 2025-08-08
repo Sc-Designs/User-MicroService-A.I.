@@ -44,10 +44,18 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    block:{
+    block: {
       type: Boolean,
       default: false,
-    }
+    },
+    forgeterOtp: {
+      type: String,
+      default: null,
+    },
+    forgeterOtpExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

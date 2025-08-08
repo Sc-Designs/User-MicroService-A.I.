@@ -181,16 +181,14 @@ const profileEdit = async (req, res) => {
   }
 
   await user.save();
-  res.status(200).json({
-    user: cleanUpUser(user),
-  });
+
   return res
     .status(200)
     .json({ message: "Profile updated successfully", user: cleanUpUser(user) });
 };
 
 const logOut = async (req,res)=>{
-  const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+  const token = req.token;
   redisClient.set(token, "logout","EX", 60*60*24)
   res.status(200).json("LogOut successfully.")
 }
@@ -200,20 +198,20 @@ const analytics = async (req, res) => {
   const groupBy = getGroupStage(filter);
 
   try {
+    const count = await User.estimatedDocumentCount();
     const result = await User.aggregate([
       { $match: { createdAt: { $exists: true } } },
       { $group: { _id: groupBy, count: { $sum: 1 } } },
       { $sort: { "_id.year": 1, "_id.month": 1, "_id.week": 1 } },
     ]);
 
-    res.json(result);
+    res.json({result, count});
   } catch (err) {
     res
       .status(500)
       .json({ message: "User analytics error", error: err.message });
   }
 };
-
 
 const SearchPeople = async (req, res) => {
   const { query = "", page = 1 } = req.query;
@@ -269,6 +267,80 @@ const blockUser = async (req, res)=>{
   res.status(200).json({blockStatus: user.block, message: "user block status changed successfully"});
 }
 
+const forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await userFinder({ key: "email", query: email.trim().toLowerCase() });
+    const otp = createOtp(6);
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+    const forgeteOtpExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    user.forgeterOtp = hashedOtp;
+    user.forgeterOtpExpiry = forgeteOtpExpiry;
+    await user.save();
+    res.status(200).json({ message: "OTP sent to your email or email spam" });
+    await sendEmail({
+      email,
+      sub: "Forget OTP Recive",
+      mess: `Your forget password OTP is ${otp}`,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const otpValidation = async (req,res) => {
+  try {
+    const { email, otp } = req.body;
+    const user = await userFinder({
+      key: "email",
+      query: email.toLowerCase().trim(),
+      lean: true,
+    });
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+    if (
+      user.forgeterOtp == hashedOtp &&
+      user.forgeterOtpExpiry > new Date(Date.now())
+    ) {
+      return res.status(200).json({ message: "OTP is valid", result: true });
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired OTP", result: false });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+    const user = await userFinder({
+      key: "email",
+      query: email.trim().toLowerCase(),
+      includePassword: true,
+    });
+    const isMatch = await user.comparePassword(password);
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+    if (isMatch) return res.status(409).json({ msg: "Same password" });
+    if (
+      user.forgeterOtp == hashedOtp &&
+      user.forgeterOtpExpiry > new Date(Date.now())
+    ) {
+      const hashPassword = await User.hashPassword(password);
+      user.password = hashPassword;
+      user.forgeterOtp = null;
+      user.forgeterOtpExpiry = null;
+      await user.save();
+      res.status(200).json({ msg: "Password updated" });
+    } else {
+      res.status(401).json({ msg: "Invalid OTP or expired" });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export {
   Register,
   Login,
@@ -281,4 +353,7 @@ export {
   SearchPeople,
   addResult,
   blockUser,
+  forgetPassword,
+  otpValidation,
+  updatePassword,
 };
