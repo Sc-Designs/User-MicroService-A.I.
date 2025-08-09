@@ -21,66 +21,35 @@ import { body } from "express-validator";
 import logerAuthenticate from "../middleware/isLoggedInUser.js";
 import isAdminLoggedIn from "../middleware/isAdminLoggedIn.js";
 
-
 const router = express.Router();
 const upload = multer();
 
-router.post(
-  "/register",
-  [
-    body("name")
-      .isLength({ min: 3 })
-      .withMessage("Name must above of 3 Charecters"),
-    body("email").isEmail().withMessage("Email is not verified"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must above of 6 Charecters"),
-  ],
-  tryCatch(Register)
-);
+router.post("/register", [body("name").isLength({ min: 3 }).withMessage("Name must above of 3 Charecters"), body("email").isEmail().withMessage("Email is not verified"), body("password").isLength({ min: 6 }).withMessage("Password must above of 6 Charecters")],tryCatch(Register));
 
-router.post(
-  "/login",
-  [
-    body("email").isEmail().withMessage("Email is not verified"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must above of 6 Charecters"),
-  ],
-  tryCatch(Login)
-);
+router.post("/login", [body("email").isEmail().withMessage("Email is not verified")],tryCatch(Login));
 
-router.post(
-  "/verify-otp",
-  [
-    body("otp")
-      .isLength({ min: 6, max: 6 })
-      .withMessage("otp must be 6 charecters"),
-    body("email").isEmail(),
-  ],
-  tryCatch(verifyOtp)
-);
+router.post("/verify-otp", [body("otp").isLength({ min: 6, max: 6 }).withMessage("otp must be 6 charecters"), body("email").isEmail()], tryCatch(verifyOtp));
 
 router.post("/resend-otp", [body("email").isEmail()], tryCatch(resendOtp));
 
-router.post(
-  "/edit",
-  logerAuthenticate,
-  upload.single("avatar"),
-  tryCatch(profileEdit)
-);
+router.patch("/edit", logerAuthenticate, upload.single("avatar"), tryCatch(profileEdit));
 
-
-router.get("/profile",
-  logerAuthenticate, tryCatch(GetProfile)
-);
+router.get("/profile", logerAuthenticate, tryCatch(GetProfile));
 
 router.get("/analytics", isAdminLoggedIn, tryCatch(analytics));
+
 router.post("/forgetPass",[body("email").isEmail().withMessage("This email is not valid."), body("otp").isLength({min: 6, max: 6})], tryCatch(forgetPassword));
+
 router.post("/forget-pass-otp", tryCatch(otpValidation));
+
 router.post("/updatePassword", tryCatch(updatePassword));
+
 router.get("/search", isAdminLoggedIn, tryCatch(SearchPeople));
+
 router.post("/result-add", logerAuthenticate, tryCatch(addResult));
+
 router.post("/block-user", isAdminLoggedIn, tryCatch(blockUser));
+
 router.get("/log-out",logerAuthenticate, tryCatch(logOut));
+
 export default router;

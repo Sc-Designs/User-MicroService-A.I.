@@ -58,11 +58,11 @@ const Login = async (req, res) => {
   });
   if (!user)
     return res
-      .status(404)
+      .status(400)
       .json({ message: "email or password something wrong!" });
   const isMatch = await user.comparePassword(password);
   if (!isMatch)
-    return res.status(404).json("email or password something wrong!");
+    return res.status(400).json("email or password something wrong!");
   const otp = createOtp(6);
   const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
   user.otp = hashedOtp;
@@ -172,7 +172,7 @@ const profileEdit = async (req, res) => {
   if (avatarPublicId) user.profileImagePublicId = avatarPublicId;
 
   if (currentPassword && confirmPassword) {
-    const isMatch = await user.ComparePassword(currentPassword);
+    const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {
       return res.status(400).json({ message: "Current password is incorrect" });
     }
