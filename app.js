@@ -20,6 +20,6 @@ app.use(cors());
 
 app.use("/", userRoute);
 
-app.listen(3001, () => {
+app.listen(process.env.PORT || 3000, () => {
    console.log("User Service runing on Port 3001");
  });
