@@ -17,15 +17,6 @@ app.use(cookieParser());
 
 app.use(cors());
 
-userRoute.stack.forEach((layer) => {
-  if (layer.route) {
-    console.log(
-      Object.keys(layer.route.methods).join(", ").toUpperCase(),
-      layer.route.path
-    );
-  }
-});
-
 
 app.use("/", userRoute);
 
