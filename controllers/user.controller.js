@@ -3,7 +3,7 @@ import cleanUpUser from "../utils/cleanUpUser.js";
 import userFinder from "../utils/userFinder.js";
 import { validationResult } from "express-validator";
 import sendEmail from "./../utils/EmailSender.js";
-import createOtp from "../utils/OtpMaker.js";
+import createOtp from "../utils/otpMaker.js";
 import crypto from "crypto";
 import { uploadImage } from "../db/cloudinary-connection.js";
 import { v2 as cloudinary } from "cloudinary";
