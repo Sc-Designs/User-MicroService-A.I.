@@ -17,8 +17,10 @@ app.use(cookieParser());
 
 app.use(cors());
 
-
-app.use("/", userRoute);
+app.use("/",(req, res)=>{
+  res.send("Helth Check");
+});
+app.use("/api", userRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
