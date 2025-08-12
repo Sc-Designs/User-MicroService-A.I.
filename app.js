@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 app.use(cors());
 
-app.use("/",(req, res)=>{
+app.get("/",(req, res)=>{
   res.send("Helth Check");
 });
 app.use("/api", userRoute);
