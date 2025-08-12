@@ -11,7 +11,7 @@ const isAdminLoggedIn = async (req, res, next) => {
         return res.status(401).json({ error: "Unauthorized" });
         }
         const response = await axios.get(
-          `${process.env.ADMIN_API_URL}/profile`,
+          `${process.env.ADMIN_API_URL}/api/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
