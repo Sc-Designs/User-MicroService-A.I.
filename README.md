@@ -74,8 +74,7 @@ The system is designed using **microservices**, connected via a **Gateway** and 
 
 ### 1️ Clone the repository
 ```bash
-git clone https://github.com/your-username/ai-interviewer.git
-cd ai-interviewer
+git clone https://github.com/Sc-Designs/User-MicroService-A.I.
 ```
 
 ###  Setup .env for each microservice
